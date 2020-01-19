@@ -1,0 +1,96 @@
+{% extends 'base.html' %}
+
+{% block content %}
+    
+    <div class="form-group">
+        <select class="form-control" id="rateSelect">
+            <option value="today" selected>Today</option>
+            <option value="thisWeek">This Week</option>
+            <option value="thisMonth">This Month</option>
+        </select>
+    </div>
+
+    <div class="container">
+        <canvas id="theChart" width="500px" height="500px" style="display: block;"></canvas>
+    </div>
+
+
+        
+    <script type="text/javascript">
+            var data = '{{ room_data|escapejs }}';
+            data = JSON.parse(data);
+        
+            var selection = document.getElementById("rateSelect");
+            var option = selection.options[selection.selectedIndex].value;
+
+            const electricData = [];
+            const heatData = [];
+            const myLabels = [];
+
+            if (option === "today") {
+                var today = data[data.length-1];
+                var dateString = today["fields"]["date"];
+
+                const result = data.filter(item => item["fields"]["date"] === dateString);
+                result.forEach(element => myLabels.push(element["fields"]["time"]));
+                result.forEach(e => electricData.push(e["fields"]["electric"]));
+                result.forEach(e => heatData.push(e["fields"]["heat"]));
+            }
+
+            var lineChartData = {
+                labels: myLabels,
+                datasets: [{
+                    label:"Electric",
+                    borderColor: 'rgba(255,0,0,0.8)',
+                    backgroundColor: 'rgba(255,0,0,0.8)',
+                    fill:false,
+                    data: electricData,
+                    yAxisID: 'y-axis-1',
+                }, {
+                    label:"Heat",
+                    borderColor: 'rgba(0,0,255,0.8)',
+                    backgroundColor: 'rgba(0,0,255,0.8)',
+                    fill: false,
+                    data: heatData,
+                    yAxisID: 'y-axis-2',
+                }]
+            };
+
+            window.onload = function() {
+                var ctx = document.getElementById('theChart').getContext('2d');
+
+                window.lineChart = Chart.Line(ctx, {
+                    data: lineChartData,
+                    options: {
+                        responsive: true,
+                        hoverMode: 'index',
+                        stacked: false,
+                        title: {
+                            display: true,
+                            text: 'Data visualizer of the selected room',
+                        },
+                        scales: {
+                            yAxes: [{
+                                type: 'linear',
+                                display: true,
+                                position: 'left',
+                                id: 'y-axis-1',
+                            }, {
+                                type: 'linear',
+                                display: true,
+                                position: 'right',
+                                id: 'y-axis-2',
+                                gridLines: {
+                                    drawOnChartArea: false,
+                                },
+                            }],
+                        }
+                    }
+                });
+            };
+
+        
+    </script>
+    
+{% endblock %}
+
