@@ -50,3 +50,6 @@ python3 manage.py runserver 8000
 ## How it works
 
 With the data given by the professors, I import it into the database (SQLite) represented as Django Models. From these models, I send the data to the front-end under JSON format so that it can be manipulated by Javascript. The JSON object is extracted and filtered to provide appropriate data for the graphs using Chartjs. 
+
+
+![Demo Picture](/images/data_graph_demo.png)
