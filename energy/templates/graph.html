@@ -1,22 +1,202 @@
 {% extends 'base.html' %}
 
+
 {% block content %}
     
-    <div class="form-group">
+   <!--  <div class="form-group">
         <select class="form-control" id="rateSelect">
             <option value="today" selected>Today</option>
             <option value="thisWeek">This Week</option>
             <option value="thisMonth">This Month</option>
         </select>
+    </div> -->
+
+    <input type="text" name="daterange" id="daterange" value="01/01/2020 - 01/14/2020" />
+
+    <div class="container" style="position: relative; margin: auto; height: 80vh; width: 80vw;">
+        <canvas id="theChart" style="display: block;"></canvas>
     </div>
 
-    <div class="container">
-        <canvas id="theChart" width="500px" height="500px" style="display: block;"></canvas>
-    </div>
+
+    
+    <script>
+        var begin;
+        var ending;
+        var data;
+        var result;
+        var electricData = [];
+        var myLabels = [];
+
+        function getDaysInMonth(year, month) {
+            return new Date(year, month, 0).getDate().toString();
+        }
+
+        function getDataInEachMonth(data, startDay, startMonth, startYear, endDay, endMonth, endYear) {
+            // Case 1: if 'start month' equals to 'end month', it means the date range selected is
+            // of the same year, same month -> only need to query the days.
+            if (startMonth == endMonth) {
+                console.log(startMonth, "haha");
+                // either endYear or startYear will do
+                var sub_result = data.filter(item => parseInt(item["fields"]["year"]) == parseInt(endYear));
+                sub_result = sub_result.filter(item => parseInt(item["fields"]["month"]) == parseInt(endMonth));
+                sub_result = sub_result.filter(item => parseInt(item["fields"]["day"]) <= parseInt(endDaySelected));
+                sub_result = sub_result.filter(item => parseInt(item["fields"]["day"]) >= parseInt(startDaySelected));
+                console.log(sub_result);
+                return sub_result;
+            }
+
+            // Case 2: different/several months selected, might be in different years.
+            // Call case 1 on every month of this case.
+            else {
+                if (startYear == endYear) {
+
+                    var listOfMonths = [];
+                    var start = parseInt(startMonth);
+                    var end = parseInt(endMonth);
+                    while (start <= end) {
+                        listOfMonths.push(start.toString());
+                        start +=1;
+                    }
+
+                    let s_result = [];
+
+                    console.log(listOfMonths);
+                    console.log(startDay, startMonth, startYear,getDaysInMonth(parseInt(startYear), parseInt(startMonth)), startMonth, startYear );
+                    
+                    s_result.concat(getDataInEachMonth(data, startDay, startMonth, startYear, getDaysInMonth(parseInt(startYear), parseInt(startMonth)), startMonth, startYear ));
+
+                    console.log(s_result);
+                    if (listOfMonths.length > 2) {
+                        for (var i  = 1; i < listOfMonths.length; i++) {
+                            result += getDataInEachMonth(data, "1", listOfMonths[i], startYear, getDaysInMonth(parseInt(startYear), listOfMonths[i]), endYear );
+                        }
+                    }
+
+                    result += getDataInEachMonth(data, "1", endMonth, endYear, endDay, endMonth, endYear);
+
+                    return result;
+                }
+
+                else {}
+            }
+        }
+
+        $(function() {
+            $(document.querySelector('input[name="daterange"]')).daterangepicker({
+                opens: 'left'
+            }, function(start, end, label) {
+
+                data = '{{ meter_data | escapejs }}';
+                data = JSON.parse(data);
+
+                begin = start.format('YYYY-MM-DD');
+                ending = end.format('YYYY-MM-DD');
+
+                electricData = [];
+                myLabels = [];
+
+                startDaySelected = begin.substring(8,9) == "0" ? begin.substring(9,10) : begin.substring(8,10);
+                startMonthSelected = begin.substring(5,6) == "0" ? begin.substring(6,7) : begin.substring(5,7);
+                startYearSelected = begin.substring(0,4);
+                
+                endDaySelected = ending.substring(8,9) == "0" ? ending.substring(9,10) : ending.substring(8,10);
+                endMonthSelected = ending.substring(5,6) == "0" ? ending.substring(6,7) : ending.substring(5,7);
+                endYearSelected = ending.substring(0,4);
 
 
+                /* result = data.filter(item => parseInt(item["fields"]["year"]) <= parseInt(endYearSelected));
+                console.log(result);
+                result = result.filter(item => parseInt(item["fields"]["year"]) >= parseInt(startYearSelected));
+                console.log(result);
+                result = result.filter(item => parseInt(item["fields"]["month"] )<= parseInt(endMonthSelected));
+                console.log(result);
+                result = result.filter(item => parseInt(item["fields"]["month"]) >= parseInt(startMonthSelected));
+                console.log(result);
+                result = result.filter(item => parseInt(item["fields"]["day"]) <= parseInt(endDaySelected));
+                console.log(result);
+                result = result.filter(item => parseInt(item["fields"]["day"]) >= parseInt(startDaySelected)); */
+
+                result = getDataInEachMonth(data, startDaySelected, startMonthSelected, startYearSelected, endDaySelected, endMonthSelected, endYearSelected);
+                console.log(result);
+
+                result.forEach(e => myLabels.push(new Date(e["fields"]["year"],(parseInt(e["fields"]["month"]) - 1).toString(),e["fields"]["day"])));
+                result.forEach(element => electricData.push(element["fields"]["consumption"]));
+
+                electricData.reverse();
+                myLabels.reverse();
+                var lineChartData = {
+                    labels: myLabels,
+                    datasets: [{
+                        label:"Electric",
+                        borderColor: 'rgba(255,0,0,0.8)',
+                        backgroundColor: 'rgba(255,0,0,0.8)',
+                        fill:false,
+                        data: electricData,
+                        yAxisID: 'y-axis-1',
+                    }]
+                };
+
+                function graphGenerator() {
+                    var ctx = document.getElementById('theChart').getContext('2d');
+
+                    window.lineChart = Chart.Line(ctx, {
+                        data: lineChartData,
+                        options: {
+                            elements: {
+                                line: {
+                                    tension: 0
+                                }
+                            },
+                            responsive: true,
+                            hoverMode: 'index',
+                            stacked: false,
+                            title: {
+                                display: true,
+                                text: 'Data visualizer of the selected meter',
+                            },
+                            scales: {
+                                yAxes: [{
+                                    display: true,
+                                    position: 'left',
+                                    id: 'y-axis-1',
+                                    distribution: 'linear',
+                                    scaleLabel: {
+                                        display: true,
+                                        labelString: "kwH",
+                                        fontFamily: "'Times New Roman', Times, serif",
+                                        fontSize: 20,
+                                        fontStyle: 'bold'
+                                    },
+
+                                    /* gridLines: {
+                                        drawOnChartArea: true,
+                                    }, */
+                                    ticks: {
+                                        beginAtZero: true
+                                    },
+                                }],
+                                
+                                xAxes: [{
+                                    type: 'time',
+                                    distribution: 'linear',
+                                    time: {
+                                        unit: 'day'
+                                    },
+                                }]
+                            }
+                            
+                        }
+                    });
+                };
+
+                graphGenerator();
+
+
+            });
+        });
+    </script>
         
-    <script type="text/javascript">
+<!--     <script type="text/javascript">
             var data = '{{ room_data|escapejs }}';
             data = JSON.parse(data);
         
@@ -24,7 +204,6 @@
             var option = selection.options[selection.selectedIndex].value;
 
             const electricData = [];
-            const heatData = [];
             const myLabels = [];
 
             if (option === "today") {
@@ -90,7 +269,7 @@
             };
 
         
-    </script>
+    </script> -->
     
 {% endblock %}
 

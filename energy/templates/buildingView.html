@@ -5,7 +5,7 @@
     {% if my_building_list %}
         {% for building in my_building_list %}
             <li>
-                <a href="{{ building.get_absolute_url }}"> {{ building.name }} </a>
+                <a href="{{ building.get_absolute_url }}"> {{ building.name }}</a>
             </li>
         {% endfor %}
     {% else %}
@@ -17,6 +17,5 @@
 
 {% block content %}
 
-<h4>Number of Buildings: <strong>{{ num_building }}</strong></h4>
 <h3>This is a placeholder for the graph</h3>
 {% endblock %}

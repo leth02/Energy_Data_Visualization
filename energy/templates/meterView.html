@@ -1,0 +1,11 @@
+{% extends "buildingView.html" %}
+
+{% block content %}
+    {% for meter in my_meter_list %}
+        
+        <a href="{{ meter.get_absolute_url }}" role="button" class="btn btn-info btn-lg"><span> {{ meter.name }} </span></a>
+    
+        
+    {% endfor %}
+
+{% endblock %}

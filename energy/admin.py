@@ -1,6 +1,7 @@
 from django.contrib import admin
-from .models import Energy, Room, Building
+from .models import Building, Building_Meter, Meter, Meter_dly
 
-admin.site.register(Energy)
-admin.site.register(Room)
 admin.site.register(Building)
+admin.site.register(Building_Meter)
+admin.site.register(Meter)
+admin.site.register(Meter_dly)
