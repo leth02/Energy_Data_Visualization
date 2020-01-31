@@ -27,7 +27,7 @@ The work is supervised by Dr. Roman Yasinovskyy and Dr. Philip Iversen.
 ` source .venv/bin/activate `
 
 ### 4. Install Django (it is recommended to use pip)
-python3 –m pip install Django
+` python3 –m pip install Django `
 
 ### 5. Include Chartjs, Momentjs, jQuery and other bootstrap packages.
 I have already included all the script tags needed in the proper order (do not change the order of these script tags).
@@ -41,7 +41,7 @@ There are several ways to install Chartjs. Since I do not use any front-end web 
 ` <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/2.9.3/Chart.min.js"></script> `
 
 ### 6. Run the local server on the desired port (8000 by default)
-python3 manage.py runserver 8000
+` python3 manage.py runserver 8000 `
 
 ### 7. Open your favorite browser and go to the link at http://127.0.0.1:8000/
 
