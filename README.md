@@ -1,16 +1,16 @@
 # Energy_Data_Visualization
-===============================================================================
+============================================================================
 ## Introduction
 
 This project is aimed at __providing a visualization tool for the data of energy consumption__ at Luther College.
 
-By utilizing data from the water/electricity/heat monitoring devices throughout the campus, I have built a simple web application to display energy data from database using different types of graphs.
+By utilizing data from the water/electricity/heat monitoring devices throughout the campus, I have built a simple prototype to display energy data from database using line graphs.
 
 The programming languages and tools that I use include __Python, Django, Javascript, Chartjs, HTML, CSS__.
 
 The work is supervised by Dr. Roman Yasinovskyy and Dr. Philip Iversen.
 
-===============================================================================
+============================================================================
 
 ## Step-by-step Set-up
 
@@ -45,7 +45,7 @@ There are several ways to install Chartjs. Since I do not use any front-end web 
 
 ### 7. Open your favorite browser and go to the link at http://127.0.0.1:8000/
 
-===============================================================================
+=========================================================================
 
 ## How it works
 
